@@ -164,7 +164,7 @@ void draw_box(struct term_buf* buf)
 	}
 }
 
-struct tb_cell* strn_cell(char* s, u16 len) // throws
+struct tb_cell* strn_cell(char* s, u16 len, u8 fg, u8 bg) // throws
 {
 	struct tb_cell* cells = malloc((sizeof (struct tb_cell)) * len);
 	char* s2 = s;
@@ -182,8 +182,8 @@ struct tb_cell* strn_cell(char* s, u16 len) // throws
 			s2 += utf8_char_to_unicode(&c, s2);
 
 			cells[i].ch = c;
-			cells[i].bg = config.bg;
-			cells[i].fg = config.fg;
+			cells[i].bg = bg;
+			cells[i].fg = fg;
 		}
 	}
 	else
@@ -194,15 +194,15 @@ struct tb_cell* strn_cell(char* s, u16 len) // throws
 	return cells;
 }
 
-struct tb_cell* str_cell(char* s) // throws
+struct tb_cell* str_cell(char* s, u8 fg, u8 bg) // throws
 {
-	return strn_cell(s, strlen(s));
+	return strn_cell(s, strlen(s), fg, bg);
 }
 
 void draw_labels(struct term_buf* buf) // throws
 {
 	// login text
-	struct tb_cell* login = str_cell(lang.login);
+	struct tb_cell* login = str_cell(lang.login, config.fg, config.bg);
 
 	if (dgn_catch())
 	{
@@ -220,7 +220,7 @@ void draw_labels(struct term_buf* buf) // throws
 	}
 
 	// password text
-	struct tb_cell* password = str_cell(lang.password);
+	struct tb_cell* password = str_cell(lang.password, config.fg, config.bg);
 
 	if (dgn_catch())
 	{
@@ -240,7 +240,7 @@ void draw_labels(struct term_buf* buf) // throws
 	if (buf->info_line != NULL)
 	{
 		u16 len = strlen(buf->info_line);
-		struct tb_cell* info_cell = str_cell(buf->info_line);
+		struct tb_cell* info_cell = str_cell(buf->info_line, config.fg, config.bg);
 
 		if (dgn_catch())
 		{
@@ -259,9 +259,11 @@ void draw_labels(struct term_buf* buf) // throws
 	}
 }
 
-void draw_f_commands()
+void draw_info_bar(struct term_buf* buf)
 {
-	struct tb_cell* f1 = str_cell(lang.f1);
+	int width = tb_width();
+
+	struct tb_cell* f1 = str_cell(lang.f1, config.fg, config.bg_bar_diff ? config.bg_bar : config.bg);
 
 	if (dgn_catch())
 	{
@@ -273,7 +275,7 @@ void draw_f_commands()
 		free(f1);
 	}
 
-	struct tb_cell* f2 = str_cell(lang.f2);
+	struct tb_cell* f2 = str_cell(lang.f2, config.fg, config.bg_bar_diff ? config.bg_bar : config.bg);
 
 	if (dgn_catch())
 	{
@@ -283,6 +285,48 @@ void draw_f_commands()
 	{
 		tb_blit(strlen(lang.f1) + 1, 0, strlen(lang.f2), 1, f2);
 		free(f2);
+	}
+
+	struct tb_cell* empty = str_cell(" ", config.fg, config.bg_bar_diff ? config.bg_bar : config.bg);
+
+	if (dgn_catch())
+	{
+		dgn_reset();
+	}
+	else
+	{
+		int i = strlen(lang.f1) + 1 + strlen(lang.f2);
+
+		tb_blit(strlen(lang.f1), 0, 1, 1, empty);
+		for(; i < width; ++i) {
+			tb_blit(i, 0, 1, 1, empty);
+		}
+
+		free(empty);
+	}
+
+	// TODO: Prevent null character from attaching to the end
+	char* time = (char*) malloc(25);
+	get_time(time);
+	time = (char*) realloc(time, 24);
+
+	struct tb_cell* date_time = str_cell(time, config.fg, config.bg_bar_diff ? config.bg_bar : config.bg);
+
+	if (dgn_catch())
+	{
+		dgn_reset();
+	}
+	else
+	{
+		tb_blit(
+			buf->box_x + ((buf->box_width - 24) / 2),
+			0,
+			24,
+			1,
+			date_time);
+
+		free(date_time);
+		free(time);
 	}
 }
 
@@ -319,7 +363,7 @@ void draw_lock_state(struct term_buf* buf)
 
 	if (numlock_on)
 	{
-		struct tb_cell* numlock = str_cell(lang.numlock);
+		struct tb_cell* numlock = str_cell(lang.numlock, config.fg, config.bg_bar_diff ? config.bg_bar : config.bg);
 
 		if (dgn_catch())
 		{
@@ -336,7 +380,7 @@ void draw_lock_state(struct term_buf* buf)
 
 	if (capslock_on)
 	{
-		struct tb_cell* capslock = str_cell(lang.capslock);
+		struct tb_cell* capslock = str_cell(lang.capslock, config.fg, config.bg_bar_diff ? config.bg_bar : config.bg);
 
 		if (dgn_catch())
 		{
@@ -394,7 +438,7 @@ void draw_input(struct text* input)
 		len = visible_len;
 	}
 
-	struct tb_cell* cells = strn_cell(input->visible_start, len);
+	struct tb_cell* cells = strn_cell(input->visible_start, len, config.fg, config.bg);
 
 	if (dgn_catch())
 	{
@@ -513,19 +557,19 @@ static void doom(struct term_buf* term_buf)
 {
 	static struct tb_cell fire[DOOM_STEPS] =
 	{
-		{' ', 9, 0}, // default
-		{0x2591, 2, 0}, // red
-		{0x2592, 2, 0}, // red
-		{0x2593, 2, 0}, // red
-		{0x2588, 2, 0}, // red
-		{0x2591, 4, 2}, // yellow
-		{0x2592, 4, 2}, // yellow
-		{0x2593, 4, 2}, // yellow
-		{0x2588, 4, 2}, // yellow
-		{0x2591, 8, 4}, // white
-		{0x2592, 8, 4}, // white
-		{0x2593, 8, 4}, // white
-		{0x2588, 8, 4}, // white
+		{' ', 8, 0}, // default
+		{0x2591, 1, 0}, // red
+		{0x2592, 1, 0}, // red
+		{0x2593, 1, 0}, // red
+		{0x2588, 1, 0}, // red
+		{0x2591, 3, 1}, // yellow
+		{0x2592, 3, 1}, // yellow
+		{0x2593, 3, 1}, // yellow
+		{0x2588, 3, 1}, // yellow
+		{0x2591, 7, 3}, // white
+		{0x2592, 7, 3}, // white
+		{0x2593, 7, 3}, // white
+		{0x2588, 7, 3}, // white
 	};
 
 	u16 src;

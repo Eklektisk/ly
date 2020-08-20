@@ -63,12 +63,15 @@ struct config
 	bool animate;
 	u8 animation;
 	char asterisk;
-	u8 bg;
+	bool bar_fill;
+	u32 bg;
+	u32 bg_bar;
+	bool bg_bar_diff;
 	bool blank_box;
 	bool blank_password;
 	char* console_dev;
 	u8 default_input;
-	u8 fg;
+	u32 fg;
 	bool hide_borders;
 	u8 input_len;
 	char* lang;

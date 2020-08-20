@@ -132,7 +132,7 @@ int main(int argc, char** argv)
 
 	// start termbox
 	tb_init();
-	tb_select_output_mode(TB_OUTPUT_NORMAL);
+	tb_select_output_mode(TB_OUTPUT_256);
 	tb_clear();
 
 	// init visible elements
@@ -177,7 +177,7 @@ int main(int argc, char** argv)
 				animate(&buf);
 				draw_box(&buf);
 				draw_labels(&buf);
-				draw_f_commands();
+				draw_info_bar(&buf);
 				draw_lock_state(&buf);
 				position_input(&buf, &desktop, &login, &password);
 				draw_desktop(&desktop);

@@ -648,7 +648,7 @@ void auth(
 
 	// reinit termbox
 	tb_init();
-	tb_select_output_mode(TB_OUTPUT_NORMAL);
+	tb_select_output_mode(TB_OUTPUT_256);
 
 	// reload the desktop environment list on logout
 	input_desktop_free(desktop);

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
@@ -273,4 +274,88 @@ void load(struct desktop* desktop, struct text* login)
 
 	fclose(fp);
 	free(line);
+}
+
+void get_time(char* buf) {
+	time_t now;
+	time(&now);
+
+	struct tm* local = localtime(&now);
+
+	char* day;
+	switch(local->tm_wday) {
+		case 0:
+			day = strdup("Sun");
+			break;
+		case 1:
+			day = strdup("Mon");
+			break;
+		case 2:
+			day = strdup("Tue");
+			break;
+		case 3:
+			day = strdup("Wed");
+			break;
+		case 4:
+			day = strdup("Thu");
+			break;
+		case 5:
+			day = strdup("Fri");
+			break;
+		case 6:
+			day = strdup("Sat");
+			break;
+	}
+
+	char* month;
+	switch(local->tm_mon) {
+		case 0:
+			month = strdup("Jan");
+			break;
+		case 1:
+			month = strdup("Feb");
+			break;
+		case 2:
+			month = strdup("Mar");
+			break;
+		case 3:
+			month = strdup("Apr");
+			break;
+		case 4:
+			month = strdup("May");
+			break;
+		case 5:
+			month = strdup("Jun");
+			break;
+		case 6:
+			month = strdup("Jul");
+			break;
+		case 7:
+			month = strdup("Aug");
+			break;
+		case 8:
+			month = strdup("Sep");
+			break;
+		case 9:
+			month = strdup("Oct");
+			break;
+		case 10:
+			month = strdup("Nov");
+			break;
+		case 11:
+			month = strdup("Dec");
+			break;
+	}
+
+	snprintf(
+		buf,
+		25,
+		"%s %d %s %02d %02d:%02d:%02d",
+		day,
+		local->tm_year + 1900,
+		month,
+		local->tm_mday,
+		local->tm_hour,
+		local->tm_min,
+		local->tm_sec);
 }

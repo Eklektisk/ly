@@ -50,6 +50,18 @@ static void config_handle_u16(void* data, char** pars, const int pars_count)
 	}
 }
 
+static void config_handle_u32(void* data, char** pars, const int pars_count)
+{
+	if (strcmp(*pars, "") == 0)
+	{
+		*((u32*)data) = 0;
+	}
+	else
+	{
+		*((u32*)data) = atoi(*pars);
+	}
+}
+
 void config_handle_str(void* data, char** pars, const int pars_count)
 {
 	if (*((char**)data) != NULL)
@@ -158,12 +170,15 @@ void config_load(const char *cfg_path)
 		{"animate", &config.animate, config_handle_bool},
 		{"animation", &config.animation, config_handle_u8},
 		{"asterisk", &config.asterisk, config_handle_char},
-		{"bg", &config.bg, config_handle_u8},
+		{"bar_fill", &config.bar_fill, config_handle_bool},
+		{"bg", &config.bg, config_handle_u32},
+		{"bg_bar", &config.bg_bar, config_handle_u32},
+		{"bg_bar_diff", &config.bg_bar_diff, config_handle_bool},
 		{"blank_box", &config.blank_box, config_handle_bool},
 		{"blank_password", &config.blank_password, config_handle_bool},
 		{"console_dev", &config.console_dev, config_handle_str},
 		{"default_input", &config.default_input, config_handle_u8},
-		{"fg", &config.fg, config_handle_u8},
+		{"fg", &config.fg, config_handle_u32},
 		{"hide_borders", &config.hide_borders, config_handle_bool},
 		{"input_len", &config.input_len, config_handle_u8},
 		{"lang", &config.lang, config_handle_str},
@@ -192,7 +207,7 @@ void config_load(const char *cfg_path)
 		{"xsessions", &config.xsessions, config_handle_str},
 	};
 
-	uint16_t map_len[] = {34};
+	uint16_t map_len[] = {37};
 	struct configator_param* map[] =
 	{
 		map_no_section,
@@ -264,7 +279,10 @@ void config_defaults()
 	config.animate = false;
 	config.animation = 0;
 	config.asterisk = '*';
+	config.bar_fill = false;
 	config.bg = 0;
+	config.bg_bar = 0;
+	config.bg_bar_diff = false;
 	config.blank_box = true;
 	config.blank_password = false;
 	config.console_dev = strdup("/dev/console");

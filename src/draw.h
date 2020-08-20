@@ -40,11 +40,11 @@ void draw_init(struct term_buf* buf);
 void draw_free(struct term_buf* buf);
 void draw_box(struct term_buf* buf);
 
-struct tb_cell* strn_cell(char* s, u16 len);
-struct tb_cell* str_cell(char* s);
+struct tb_cell* strn_cell(char* s, u16 len, u8 fg, u8 bg);
+struct tb_cell* str_cell(char* s, u8 fg, u8 bg);
 
 void draw_labels(struct term_buf* buf);
-void draw_f_commands();
+void draw_info_bar(struct term_buf* buf);
 void draw_lock_state(struct term_buf* buf);
 void draw_desktop(struct desktop* target);
 void draw_input(struct text* input);

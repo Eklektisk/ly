@@ -12,6 +12,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -140,6 +141,7 @@ int main(int argc, char** argv)
 	struct term_buf buf;
 	u8 active_input = config.default_input;
 
+	position_input(&buf, &desktop, &login, &password);
 	(*input_handles[active_input])(input_structs[active_input], NULL);
 
 	// init drawing stuff
@@ -311,5 +313,5 @@ int main(int argc, char** argv)
 
 	config_free();
 
-	return 0;
+	return EXIT_SUCCESS;
 }

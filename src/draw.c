@@ -664,20 +664,11 @@ static void matrix(struct term_buf* term_buf)
 
 			if (tmp[src])
 			{
-				if (tmp[dst])
-				{
-					buf[dst].ch = tmp[src];
-					buf[dst].fg = 2;
-					buf[dst].bg = 0;
-				}
-				else
-				{
-					buf[dst].ch = tmp[src];
-					buf[dst].fg = 7;
-					buf[dst].bg = 0;
-				}
-
 				tmp[dst] = tmp[src];
+
+				buf[dst].ch = tmp[dst] & 127;
+				buf[dst].fg = (tmp[dst] & 128) ? 7 : 2;
+				buf[dst].bg = 0;
 			}
 			else
 			{
@@ -716,22 +707,22 @@ static void matrix(struct term_buf* term_buf)
 		}
 		else
 		{
-			if (tmp[src + w])
+			if (tmp[x + w])
 			{
-				tmp[src] = 0;
+				tmp[x] = 0;
 
-				buf[src].ch = 0;
-				buf[src].fg = 7;
-				buf[src].bg = 0;
+				buf[x].ch = 0;
+				buf[x].fg = 7;
+				buf[x].bg = 0;
 			}
 			else
 			{
-				random = (rand() % 94) + 33;
-				tmp[src] = random;
+				random = (rand() % 94) + 161;
+				tmp[x] = random;
 
-				buf[src].ch = random;
-				buf[src].fg = 7;
-				buf[src].bg = 0;
+				buf[x].ch = random & 127;
+				buf[x].fg = 7;
+				buf[x].bg = 0;
 			}
 		}
 	}
@@ -739,9 +730,6 @@ static void matrix(struct term_buf* term_buf)
 
 static void matrix_repeat(struct term_buf* term_buf)
 {
-	u16 src;
-
-	u16 w = term_buf->init_width;
 	u8* tmp = term_buf->tmp_buf;
 
 	if ((term_buf->width != term_buf->init_width) || (term_buf->height != term_buf->init_height))
@@ -751,24 +739,19 @@ static void matrix_repeat(struct term_buf* term_buf)
 
 	struct tb_cell* buf = tb_cell_buffer();
 
-	for (u16 x = 0; x < term_buf->width; ++x)
+	for (u16 src = 0; src < term_buf->width * term_buf->height; ++src)
 	{
-		for (u16 y = 0; y < term_buf->height - 1; ++y)
+		if (tmp[src])
 		{
-			src = y * w + x;
-
-			if (tmp[src])
-			{
-				buf[src].ch = tmp[src];
-				buf[src].fg = tmp[src + w] ? 2 : 7;
-				buf[src].bg = 0;
-			}
-			else
-			{
-				buf[src].ch = ' ';
-				buf[src].fg = 7;
-				buf[src].bg = 0;
-			}
+			buf[src].ch = tmp[src] & 127;
+			buf[src].fg = (tmp[src] & 128) ? 7 : 2;
+			buf[src].bg = 0;
+		}
+		else
+		{
+			buf[src].ch = ' ';
+			buf[src].fg = 7;
+			buf[src].bg = 0;
 		}
 	}
 }

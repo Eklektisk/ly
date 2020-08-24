@@ -59,5 +59,6 @@ void position_input(
 void animate_init(struct term_buf* buf);
 void animate(struct term_buf* buf);
 bool cascade(struct term_buf* buf, u8* fails);
+bool checkUpdate();
 
 #endif

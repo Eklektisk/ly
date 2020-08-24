@@ -24,11 +24,13 @@
 // global
 struct lang lang;
 struct config config;
+bool quick_exit = false;
 
 // args handles
 void arg_help(void* data, char** pars, const int pars_count)
 {
 	printf("RTFM\n");
+	quick_exit = true;
 }
 
 void arg_version(void* data, char** pars, const int pars_count)
@@ -38,6 +40,7 @@ void arg_version(void* data, char** pars, const int pars_count)
 #else
 	printf("Ly version unknown\n");
 #endif
+	quick_exit = true;
 }
 
 // low-level error messages
@@ -91,6 +94,13 @@ int main(int argc, char** argv)
 
 	struct argoat args = {sprigs, ARG_COUNT, NULL, 0, 0};
 	argoat_graze(&args, argc, argv);
+
+	if(quick_exit) {
+		lang_free();
+		config_free();
+		
+		return EXIT_SUCCESS;
+	}
 
 	// init inputs
 	struct desktop desktop;
@@ -186,6 +196,7 @@ int main(int argc, char** argv)
 				draw_input(&login);
 				draw_input_mask(&password);
 				update = config.animate;
+
 			}
 			else
 			{

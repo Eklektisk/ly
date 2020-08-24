@@ -22,6 +22,8 @@
 #endif
 
 #define DOOM_STEPS 13
+#define DOOM_FRAMES 0
+#define MATRIX_FRAMES 10
 
 void draw_init(struct term_buf* buf)
 {
@@ -538,12 +540,33 @@ static void doom_init(struct term_buf* buf)
 	memset(buf->tmp_buf + tmp_len, DOOM_STEPS - 1, buf->width);
 }
 
+static void matrix_init(struct term_buf* buf)
+{
+	buf->init_width = buf->width;
+	buf->init_height = buf->height;
+
+	u16 tmp_len = buf->width * buf->height;
+	buf->tmp_buf = malloc(tmp_len);
+
+	if (buf->tmp_buf == NULL)
+	{
+		dgn_throw(DGN_ALLOC);
+	}
+
+	memset(buf->tmp_buf, 0, tmp_len);
+}
+
 void animate_init(struct term_buf* buf)
 {
 	if (config.animate)
 	{
 		switch(config.animation)
 		{
+			case 1:
+			{
+				matrix_init(buf);
+				break;
+			}
 			default:
 			{
 				doom_init(buf);
@@ -557,7 +580,7 @@ static void doom(struct term_buf* term_buf)
 {
 	static struct tb_cell fire[DOOM_STEPS] =
 	{
-		{' ', 8, 0}, // default
+		{' ', 7, 0}, // black
 		{0x2591, 1, 0}, // red
 		{0x2592, 1, 0}, // red
 		{0x2593, 1, 0}, // red
@@ -616,6 +639,140 @@ static void doom(struct term_buf* term_buf)
 	}
 }
 
+static void matrix(struct term_buf* term_buf)
+{
+	u16 src;
+	u16 random;
+	u16 dst;
+
+	u16 w = term_buf->init_width;
+	u8* tmp = term_buf->tmp_buf;
+
+	if ((term_buf->width != term_buf->init_width) || (term_buf->height != term_buf->init_height))
+	{
+		return;
+	}
+
+	struct tb_cell* buf = tb_cell_buffer();
+
+	for (u16 x = 0; x < w; ++x)
+	{
+		for (u16 y = term_buf->init_height - 1; y > 0; --y)
+		{
+			dst = y * w + x;
+			src = dst - w;
+
+			if (tmp[src])
+			{
+				if (tmp[dst])
+				{
+					buf[dst].ch = tmp[src];
+					buf[dst].fg = 2;
+					buf[dst].bg = 0;
+				}
+				else
+				{
+					buf[dst].ch = tmp[src];
+					buf[dst].fg = 7;
+					buf[dst].bg = 0;
+				}
+
+				tmp[dst] = tmp[src];
+			}
+			else
+			{
+				if (tmp[dst])
+				{
+					tmp[dst] = 0;
+				}
+
+				buf[dst].ch = 0;
+				buf[dst].fg = 7;
+				buf[dst].bg = 0;
+			}
+		}
+
+		random = ((rand() % 32) & 30);
+
+		if (random)
+		{
+			if (tmp[x + w])
+			{
+				random = (rand() % 94) + 33;
+				tmp[x] = random;
+
+				buf[x].ch = random;
+				buf[x].fg = 2;
+				buf[x].bg = 0;
+			}
+			else
+			{
+				tmp[x] = 0;
+
+				buf[x].ch = 0;
+				buf[x].fg = 7;
+				buf[x].bg = 0;
+			}
+		}
+		else
+		{
+			if (tmp[src + w])
+			{
+				tmp[src] = 0;
+
+				buf[src].ch = 0;
+				buf[src].fg = 7;
+				buf[src].bg = 0;
+			}
+			else
+			{
+				random = (rand() % 94) + 33;
+				tmp[src] = random;
+
+				buf[src].ch = random;
+				buf[src].fg = 7;
+				buf[src].bg = 0;
+			}
+		}
+	}
+}
+
+static void matrix_repeat(struct term_buf* term_buf)
+{
+	u16 src;
+
+	u16 w = term_buf->init_width;
+	u8* tmp = term_buf->tmp_buf;
+
+	if ((term_buf->width != term_buf->init_width) || (term_buf->height != term_buf->init_height))
+	{
+		return;
+	}
+
+	struct tb_cell* buf = tb_cell_buffer();
+
+	for (u16 x = 0; x < term_buf->width; ++x)
+	{
+		for (u16 y = 0; y < term_buf->height - 1; ++y)
+		{
+			src = y * w + x;
+
+			if (tmp[src])
+			{
+				buf[src].ch = tmp[src];
+				buf[src].fg = tmp[src + w] ? 2 : 7;
+				buf[src].bg = 0;
+			}
+			else
+			{
+				buf[src].ch = ' ';
+				buf[src].fg = 7;
+				buf[src].bg = 0;
+			}
+		}
+	}
+}
+
 void animate(struct term_buf* buf)
 {
 	buf->width = tb_width();
@@ -625,6 +782,22 @@ void animate(struct term_buf* buf)
 	{
 		switch(config.animation)
 		{
+			case 1:
+			{
+				static u8 frames = MATRIX_FRAMES;
+
+				if (--frames)
+				{
+					matrix_repeat(buf);
+				}
+				else
+				{
+					frames = MATRIX_FRAMES;
+					matrix(buf);
+				}
+
+				break;
+			}
 			default:
 			{
 				doom(buf);
@@ -688,4 +861,32 @@ bool cascade(struct term_buf* term_buf, u8* fails)
 
 	// force-update
 	return true;
+}
+
+bool checkUpdate() {
+	return false;
+
+	static u8 frames = 0;
+
+	if (!frames)
+	{
+		switch (config.animation)
+		{
+			case 1:
+			{
+				frames = MATRIX_FRAMES;
+				break;
+			}
+			default:
+			{
+				frames = DOOM_FRAMES;
+				break;
+			}
+		}
+
+		return true;
+	}
+
+	--frames;
+	return false;
 }

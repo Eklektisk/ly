@@ -23,7 +23,7 @@
 
 #define DOOM_STEPS 13
 #define DOOM_FRAMES 0
-#define MATRIX_FRAMES 10
+#define MATRIX_FRAMES 5
 
 void draw_init(struct term_buf* buf)
 {
@@ -664,7 +664,14 @@ static void matrix(struct term_buf* term_buf)
 
 			if (tmp[src])
 			{
-				tmp[dst] = tmp[src];
+				if (tmp[dst] & 128)
+				{
+					tmp[dst] = tmp[dst] & 127;
+				}
+				else if (!tmp[dst])
+				{
+					tmp[dst] = (rand() % 94) + 161;
+				}
 
 				buf[dst].ch = tmp[dst] & 127;
 				buf[dst].fg = (tmp[dst] & 128) ? 7 : 2;
@@ -677,7 +684,7 @@ static void matrix(struct term_buf* term_buf)
 					tmp[dst] = 0;
 				}
 
-				buf[dst].ch = 0;
+				buf[dst].ch = ' ';
 				buf[dst].fg = 7;
 				buf[dst].bg = 0;
 			}
@@ -700,7 +707,7 @@ static void matrix(struct term_buf* term_buf)
 			{
 				tmp[x] = 0;
 
-				buf[x].ch = 0;
+				buf[x].ch = ' ';
 				buf[x].fg = 7;
 				buf[x].bg = 0;
 			}
@@ -711,7 +718,7 @@ static void matrix(struct term_buf* term_buf)
 			{
 				tmp[x] = 0;
 
-				buf[x].ch = 0;
+				buf[x].ch = ' ';
 				buf[x].fg = 7;
 				buf[x].bg = 0;
 			}

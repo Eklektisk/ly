@@ -47,7 +47,7 @@ changing the source code won't be necessary :)
 ## Cloning and Compiling
 Clone the repository
 ```
-git clone https://github.com/nullgemm/ly.git
+git clone https://github.com/Eklektisk/ly.git
 ```
 
 Fetch submodules
@@ -110,8 +110,17 @@ Use the F1 and F2 keys to respectively shutdown and reboot.
 Take a look at your .xsession if X doesn't start, as it can interfere
 (this file is launched with X to configure the display properly).
 
-## PSX DOOM fire animation
+## Animations
+To enable animations, just uncomment `animate = true` in `/etc/ly/config.ini`. The animation can be set by changing the `animation` option. You may also
+disable the main box borders with `hide_borders = true`.
+
+### PSX DOOM fire animation
 To enable the famous PSX DOOM fire described by [Fabien Sanglard](http://fabiensanglard.net/doom_fire_psx/index.html),
+set `animation = 0` in `/etc/ly/config.ini`.
+
+## Matrix animation
+To enable the matrix animation,
+set `animation = 1` in `/etc/ly/config.ini`.
 just uncomment `animate = true` in `/etc/ly/config.ini`. You may also
 disable the main box borders with `hide_borders = true`.
 

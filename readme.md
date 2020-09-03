@@ -118,7 +118,7 @@ disable the main box borders with `hide_borders = true`.
 To enable the famous PSX DOOM fire described by [Fabien Sanglard](http://fabiensanglard.net/doom_fire_psx/index.html),
 set `animation = 0` in `/etc/ly/config.ini`.
 
-## Matrix animation
+### Matrix animation
 To enable the matrix animation,
 set `animation = 1` in `/etc/ly/config.ini`.
 just uncomment `animate = true` in `/etc/ly/config.ini`. You may also

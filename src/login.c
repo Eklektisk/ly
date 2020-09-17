@@ -265,7 +265,7 @@ void env_xdg(const char* tty_id, const enum display_server display_server)
 		case DS_XINITRC:
 		case DS_XORG:
 		{
-			setenv("XDG_SESSION_TYPE", "x11", 0);
+			setenv("XDG_SESSION_TYPE", "X11", 1);
 			break;
 		}
 	}

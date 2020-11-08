@@ -635,6 +635,8 @@ void auth(
 		exit(EXIT_SUCCESS);
 	}
 
+	/* TODO: Fork session to a new TTY, reload Ly */
+
 	// add utmp audit
 	struct utmp entry;
 	add_utmp_entry(&entry, pwd->pw_name, pid);
@@ -647,6 +649,7 @@ void auth(
 	reset_terminal(pwd);
 
 	// reinit termbox
+	tb_set_clear_attributes(config.fg, config.bg_default);
 	tb_init();
 	tb_select_output_mode(TB_OUTPUT_256);
 

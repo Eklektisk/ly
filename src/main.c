@@ -141,7 +141,10 @@ int main(int argc, char** argv)
 	desktop_load(&desktop);
 	load(&desktop, &login);
 
+	/* By now, TTY2 has been selected */
+
 	// start termbox
+	tb_set_clear_attributes(config.fg, config.bg_default);
 	tb_init();
 	tb_select_output_mode(TB_OUTPUT_256);
 	tb_clear();
